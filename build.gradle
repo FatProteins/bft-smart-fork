@@ -8,8 +8,8 @@ group 'BFT-SMaRt'
 version '2.0'
 
 compileJava {
-    sourceCompatibility = 8
-    targetCompatibility = 8
+    sourceCompatibility = 19
+    targetCompatibility = 19
 }
 
 repositories {
@@ -159,4 +159,12 @@ dependencies {
 
     // https://mvnrepository.com/artifact/org.slf4j/slf4j-api
     implementation 'org.slf4j:slf4j-api:1.7.32'
+
+    implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.15.2'
+
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.2'
+
+    implementation 'org.apache.commons:commons-lang3:3.13.0'
+
+    compileOnly 'org.projectlombok:lombok:1.18.28'
 }

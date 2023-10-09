@@ -22,12 +22,14 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 
 import bftsmart.tom.ServiceProxy;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Example client that updates a BFT replicated service (a counter).
  * 
  * @author alysson
  */
+@Slf4j
 public class CounterClient {
 
     public static void main(String[] args) throws IOException {
@@ -39,14 +41,14 @@ public class CounterClient {
         }
 
         ServiceProxy counterProxy = new ServiceProxy(Integer.parseInt(args[0]));
-        
         try {
 
             int inc = Integer.parseInt(args[1]);
             int numberOfOps = (args.length > 2) ? Integer.parseInt(args[2]) : 1000;
 
             for (int i = 0; i < numberOfOps; i++) {
-
+                log.info("Waiting 1 second before sending message {}", i);
+                Thread.sleep(1000);
                 ByteArrayOutputStream out = new ByteArrayOutputStream(4);
                 new DataOutputStream(out).writeInt(inc);
 
@@ -65,6 +67,8 @@ public class CounterClient {
             }
         } catch(IOException | NumberFormatException e){
             counterProxy.close();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
     }
 }

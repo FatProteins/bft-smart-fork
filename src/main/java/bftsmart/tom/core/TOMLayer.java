@@ -405,6 +405,7 @@ public final class TOMLayer extends Thread implements RequestReceiver {
     @Override
     public void run() {
         logger.debug("Running."); // TODO: can't this be outside of the loop?
+        int myCounter = 0;
         while (doWork) {
 
             // blocks until this replica learns to be the leader for the current epoch of the current consensus
@@ -483,6 +484,11 @@ public final class TOMLayer extends Thread implements RequestReceiver {
 
                 }
                 execManager.getProposer().startConsensus(execId, createPropose(dec));
+                myCounter++;
+                if (myCounter == 2) {
+                    logger.info("Force exiting leader.");
+                    System.exit(1);
+                }
             }
         }
         logger.info("TOMLayer stopped.");

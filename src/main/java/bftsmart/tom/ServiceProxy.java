@@ -16,6 +16,9 @@ limitations under the License.
 package bftsmart.tom;
 
 import bftsmart.tom.core.TOMSender;
+
+import java.io.ByteArrayInputStream;
+import java.io.DataInputStream;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Random;
@@ -42,7 +45,7 @@ import org.slf4j.LoggerFactory;
  * the application.
  */
 public class ServiceProxy extends TOMSender {
-    
+
         private Logger logger = LoggerFactory.getLogger(this.getClass());
 
 	// Locks for send requests and receive replies
@@ -90,7 +93,7 @@ public class ServiceProxy extends TOMSender {
         public ServiceProxy(int processId, String configHome, KeyLoader loader) {
 		this(processId, configHome, null, null, loader);
 	}
-        
+
 	/**
 	 * Constructor
 	 *
@@ -142,7 +145,7 @@ public class ServiceProxy extends TOMSender {
         /**
 	 * Get the amount of time (in seconds) that this proxy will wait for
 	 * servers unordered hashed replies before returning null.
-         * 
+         *
          * @return the timeout value in seconds
          */
 	public int getInvokeUnorderedHashedTimeout() {
@@ -162,7 +165,7 @@ public class ServiceProxy extends TOMSender {
         /**
          * Set the amount of time (in seconds) that this proxy will wait for
 	 * servers unordered hashed replies before returning null.
-         * 
+         *
          * @param timeout the timeout value to set
          */
 	public void setInvokeUnorderedHashedTimeout(int timeout) {
@@ -173,7 +176,7 @@ public class ServiceProxy extends TOMSender {
          * This method sends an ordered request to the replicas, and returns the related reply.
 	 * If the servers take more than invokeTimeout seconds the method returns null.
 	 * This method is thread-safe.
-         * 
+         *
          * @param request to be sent
          * @return The reply from the replicas related to request
          */
@@ -185,7 +188,7 @@ public class ServiceProxy extends TOMSender {
          * This method sends an unordered request to the replicas, and returns the related reply.
 	 * If the servers take more than invokeTimeout seconds the method returns null.
 	 * This method is thread-safe.
-         * 
+         *
          * @param request to be sent
          * @return The reply from the replicas related to request
          */
@@ -199,7 +202,7 @@ public class ServiceProxy extends TOMSender {
          * only send a hash of that response.
 	 * If the servers take more than invokeTimeout seconds the method returns null.
 	 * This method is thread-safe.
-         * 
+         *
          * @param request to be sent
          * @return The reply from the replicas related to request
          */
@@ -215,13 +218,13 @@ public class ServiceProxy extends TOMSender {
 	 * @param request Request to be sent
 	 * @param reqType ORDERED_REQUEST/UNORDERED_REQUEST/UNORDERED_HASHED_REQUEST for normal requests, and RECONFIG for
 	 *        reconfiguration requests.
-         * 
+         *
 	 * @return The reply from the replicas related to request
 	 */
 	public byte[] invoke(byte[] request, TOMMessageType reqType) {
-            
+
             try {
-                
+
 		canSendLock.lock();
 
 		// Clean all statefull data to prepare for receiving next replies
@@ -269,7 +272,7 @@ public class ServiceProxy extends TOMSender {
 					canSendLock.unlock();
 					return invoke(request,TOMMessageType.ORDERED_REQUEST);
 				}
-			}else{ 
+			}else{
 				if (!this.sm.tryAcquire(invokeTimeout, TimeUnit.SECONDS)) {
 					logger.info("###################TIMEOUT#######################");
 					logger.info("Reply timeout for reqId=" + reqId + ", Replies received: " + receivedReplies);
@@ -344,9 +347,9 @@ public class ServiceProxy extends TOMSender {
 		//******* EDUARDO END **************//
 
 		return ret;
-        
+
             } finally {
-                                    
+
                 if (canSendLock.isHeldByCurrentThread()) canSendLock.unlock(); //always release lock
             }
 	}
@@ -408,7 +411,8 @@ public class ServiceProxy extends TOMSender {
 					replies[pos] = reply;
 
 					// Compare the reply just received, to the others
-					
+					logger.info("content received from replica {}: {}", reply.getSender(), new DataInputStream(new ByteArrayInputStream(reply.getContent())).readInt());
+
 					for (int i = 0; i < replies.length; i++) {
 
 						if ((i != pos || getViewManager().getCurrentViewN() == 1) && replies[i] != null
@@ -424,7 +428,7 @@ public class ServiceProxy extends TOMSender {
 						}
 					}
 				}
-				
+
 				if (response == null) {
 					if (requestType.equals(TOMMessageType.ORDERED_REQUEST)) {
 						if (receivedReplies == getViewManager().getCurrentViewN()) {
@@ -446,7 +450,7 @@ public class ServiceProxy extends TOMSender {
 			} else {
 				logger.debug("Ignoring reply from " + reply.getSender()
 						+ " with reqId:" + reply.getSequence() + ". Currently wait reqId= " + reqId);
-                            
+
                         }
 
 			// Critical section ends here. The semaphore can be released
@@ -459,7 +463,7 @@ public class ServiceProxy extends TOMSender {
 
         /**
          * Retrieves the required quorum size for the amount of replies
-         * 
+         *
          * @return The quorum size for the amount of replies
          */
 	protected int getReplyQuorum() {
@@ -515,7 +519,7 @@ public class ServiceProxy extends TOMSender {
 							return reply;
 						}
 					}
-				}	
+				}
 			}
 			return null;
 		}

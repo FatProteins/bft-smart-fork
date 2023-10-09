@@ -15,20 +15,19 @@ limitations under the License.
 */
 package bftsmart.clientsmanagement;
 
+import bftsmart.tom.core.messages.TOMMessage;
+import bftsmart.tom.util.TOMUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.security.PublicKey;
 import java.security.Signature;
 import java.security.SignatureException;
 import java.util.Iterator;
 import java.util.concurrent.locks.ReentrantLock;
 
-import bftsmart.tom.core.messages.TOMMessage;
-import bftsmart.tom.util.TOMUtil;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 public class ClientData {
-    
+
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
     ReentrantLock clientLock = new ReentrantLock();
@@ -46,9 +45,10 @@ public class ClientData {
     private RequestList pendingRequests = new RequestList();
     //anb: new code to deal with client requests that arrive after their execution
     private RequestList orderedRequests = new RequestList(5);
+    private RequestList cachedResponses = new RequestList(5);
 
     private Signature signatureVerificator = null;
-    
+
     /**
      * Class constructor. Just store the clientId and creates a signature
      * verificator for a given client public key.
@@ -87,6 +87,10 @@ public class ClientData {
 
     public RequestList getOrderedRequests() {
         return orderedRequests;
+    }
+
+    public RequestList getCachedResponses() {
+        return cachedResponses;
     }
 
     public void setLastMessageDelivered(int lastMessageDelivered) {
@@ -149,13 +153,18 @@ public class ClientData {
     	return result;
     }
 
+    public void cacheResponse(TOMMessage response) {
+        cachedResponses.addLast(response);
+    }
+
     public TOMMessage getReply(int reqSequence) {
-        TOMMessage request = orderedRequests.getBySequence(reqSequence);
-        if(request != null) {
-            return request.reply;
-        } else {
+        var response = cachedResponses.getBySequence(reqSequence);
+        if (response == null || response.reply == null) {
             return null;
         }
+
+        response.reply.recvFromClient = true;
+        return response.reply;
     }
 
 }

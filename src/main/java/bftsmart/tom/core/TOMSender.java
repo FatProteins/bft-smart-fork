@@ -108,16 +108,24 @@ public abstract class TOMSender implements ReplyReceiver, Closeable, AutoCloseab
 			id = unorderedMessageSequence++; 
 		lock.unlock();
 
-		if (true) {
-			return 0;
-		}
+//		if (true) {
+//			return 0;
+//		}
 		return id;
 	}
 
+	public void decrementSequenceNumber() {
+		sequence--;
+	}
+
+	public void decrementeOperationId() {
+		opCounter.decrementAndGet();
+	}
+
 	public int generateOperationId() {
-		if (true) {
-			return 0;
-		}
+//		if (true) {
+//			return 0;
+//		}
 		return opCounter.getAndIncrement();
 	}
 

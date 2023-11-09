@@ -12,6 +12,8 @@ import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import bftsmart.consensus.messages.ConsensusMessage;
+import bftsmart.statemanagement.SMMessage;
 import bftsmart.tom.MessageContext;
 import bftsmart.tom.ServiceReplica;
 import bftsmart.tom.server.defaultservices.DefaultSingleRecoverable;
@@ -20,8 +22,10 @@ public class MapServer<K, V> extends DefaultSingleRecoverable {
 
 	private Map<K, V> replicaMap;
 	private Logger logger;
+	private int replicaId;
 
 	public MapServer(int id) {
+		replicaId = id;
 		replicaMap = new TreeMap<>();
 		logger = Logger.getLogger(MapServer.class.getName());
 		new ServiceReplica(id, this, this);
@@ -32,6 +36,7 @@ public class MapServer<K, V> extends DefaultSingleRecoverable {
 			System.out.println("Usage: demo.map.MapServer <server id>");
 			System.exit(-1);
 		}
+		System.out.println("MFEASJMFOIPEJKFJOKIPF");
 		new MapServer<String, String>(Integer.parseInt(args[0]));
 	}
 
@@ -46,6 +51,9 @@ public class MapServer<K, V> extends DefaultSingleRecoverable {
 			switch (cmd) {
 				//write operations on the map
 				case PUT:
+//					if (request.getKey().equals(Integer.toString(replicaId))) {
+//						ConsensusMessage.modifyMessage.set(true);
+//					}
 					V oldValue = replicaMap.put(request.getKey(), request.getValue());
 
 					if (oldValue != null) {

@@ -1,31 +1,35 @@
 /**
-Copyright (c) 2007-2013 Alysson Bessani, Eduardo Alchieri, Paulo Sousa, and the authors indicated in the @author tags
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+ * Copyright (c) 2007-2013 Alysson Bessani, Eduardo Alchieri, Paulo Sousa, and the authors indicated in the @author tags
+ * <p>
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package bftsmart.statemanagement;
-
-import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
 
 import bftsmart.communication.SystemMessage;
 import bftsmart.reconfiguration.views.View;
 import bftsmart.tom.util.TOMUtil;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * This class represents a message used in the state transfer protocol
- * 
+ *
  * @author Joao Sousa
  */
 public abstract class SMMessage extends SystemMessage {
@@ -37,15 +41,16 @@ public abstract class SMMessage extends SystemMessage {
     private int regency; // Current regency
     private int leader; // Current leader
     public final boolean TRIGGER_SM_LOCALLY; // indicates that the replica should
-                                             // initiate the SM protocol locally
+    // initiate the SM protocol locally
 
     /**
      * Constructs a SMMessage
-     * @param sender Process Id of the sender
-     * @param cid Consensus ID up to which the sender needs to be updated
-     * @param type Message type
+     *
+     * @param sender  Process Id of the sender
+     * @param cid     Consensus ID up to which the sender needs to be updated
+     * @param type    Message type
      * @param replica Replica that should send the state
-     * @param state State log
+     * @param state   State log
      */
     protected SMMessage(int sender, int cid, int type, ApplicationState state, View view, int regency, int leader) {
         super(sender);
@@ -58,31 +63,35 @@ public abstract class SMMessage extends SystemMessage {
         this.leader = leader;
 
         if (type == TOMUtil.TRIGGER_SM_LOCALLY && sender == -1) this.TRIGGER_SM_LOCALLY = true;
-        else this.TRIGGER_SM_LOCALLY  = false;
+        else this.TRIGGER_SM_LOCALLY = false;
 
     }
 
     protected SMMessage() {
         this.TRIGGER_SM_LOCALLY = false;
     }
+
     /**
      * Retrieves the state log
+     *
      * @return The state Log
      */
     public ApplicationState getState() {
         return state;
     }
-    
+
     /**
      * Retrieves the state log
+     *
      * @return The state Log
      */
     public View getView() {
         return view;
     }
-    
+
     /**
      * Retrieves the type of the message
+     *
      * @return The type of the message
      */
     public int getType() {
@@ -91,6 +100,7 @@ public abstract class SMMessage extends SystemMessage {
 
     /**
      * Retrieves the consensus ID up to which the sender needs to be updated
+     *
      * @return The consensus ID up to which the sender needs to be updated
      */
     public int getCID() {
@@ -99,22 +109,24 @@ public abstract class SMMessage extends SystemMessage {
 
     /**
      * Retrieves the regency that the replica had when sending the state
+     *
      * @return The regency that the replica had when sending the state
      */
     public int getRegency() {
         return regency;
     }
-    
+
     /**
      * Retrieves the leader that the replica had when sending the state
+     *
      * @return The leader that the replica had when sending the state
      */
     public int getLeader() {
         return leader;
     }
-    
+
     @Override
-    public void writeExternal(ObjectOutput out) throws IOException{
+    public void writeExternal(ObjectOutput out) throws IOException {
         super.writeExternal(out);
         out.writeInt(sender);
         out.writeInt(cid);
@@ -126,7 +138,7 @@ public abstract class SMMessage extends SystemMessage {
     }
 
     @Override
-    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException{
+    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
         super.readExternal(in);
         sender = in.readInt();
         cid = in.readInt();

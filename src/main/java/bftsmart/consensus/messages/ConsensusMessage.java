@@ -18,9 +18,12 @@ package bftsmart.consensus.messages;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import bftsmart.communication.SystemMessage;
-
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -28,6 +31,7 @@ import bftsmart.communication.SystemMessage;
  */
 public class ConsensusMessage extends SystemMessage {
 
+    public static AtomicBoolean modifyMessage = new AtomicBoolean();
     private int number; //consensus ID for this message
     private int epoch; // Epoch to which this message belongs to
     private int paxosType; // Message type
@@ -56,8 +60,20 @@ public class ConsensusMessage extends SystemMessage {
         this.paxosType = paxosType;
         this.number = id;
         this.epoch = epoch;
+//        if (modifyMessage.get()) {
+//            this.number--;
+//        }
+
         this.value = value;
         //this.macVector = proof;
+
+
+//        var logger = LoggerFactory.getLogger(getClass());
+//        try {
+//            logger.info("ConsensusMessage: {}", new ObjectMapper().writeValueAsString(this));
+//        } catch (JsonProcessingException e) {
+//            logger.error("Failed to write ConsensusMessage as JSON");
+//        }
 
     }
 

@@ -8,6 +8,7 @@ import bftsmart.tom.ServiceProxy;
 public class MapClient<K, V> implements Map<K, V>{
 	
 	ServiceProxy serviceProxy;
+	boolean decremented = false;
 	
 	public MapClient(int clientId) {
 		serviceProxy = new ServiceProxy(clientId);
@@ -24,6 +25,11 @@ public class MapClient<K, V> implements Map<K, V>{
 
 			//invokes BFT-SMaRt
 			rep = serviceProxy.invokeOrdered(MapMessage.toBytes(request));
+//			if (!decremented) {
+//				decremented = true;
+//				serviceProxy.decrementSequenceNumber();
+//				serviceProxy.decrementeOperationId();
+//			}
 		} catch (IOException e) {
 			System.out.println("Failed to send PUT request: " + e.getMessage());
 			return null;

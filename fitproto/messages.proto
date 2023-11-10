@@ -1,0 +1,75 @@
+syntax = "proto3";
+
+package fit;
+
+import "google/protobuf/any.proto";
+
+enum MessageType {
+  DA_RESPONSE = 0;
+  HEARTBEAT = 1;
+  VOTE_REQUEST_RECEIVED = 2;
+  VOTE_RECEIVED = 3;
+  LOG_ENTRY_REPLICATED = 4;
+  LOG_ENTRY_COMMITTED = 5;
+  LEADER_SUSPECTED = 6;
+  FOLLOWER_SUSPECTED = 7;
+}
+
+enum ActionType {
+  NOOP_ACTION_TYPE = 0;
+  HALT_ACTION_TYPE = 1;
+  UNHALT_ACTION_TYPE = 2;
+  PAUSE_ACTION_TYPE = 3;
+  STOP_ACTION_TYPE = 4;
+  RESEND_LAST_MESSAGE_ACTION_TYPE = 5;
+}
+
+message Message {
+  MessageType messageType = 1;
+  ActionType actionType = 2;
+  bool skipResponse = 3;
+  google.protobuf.Any messageObject = 4;
+  optional CustomData customData = 5;
+}
+
+message DAResponse {
+  string responseType = 1;
+}
+
+message CustomData {
+  string protocolName = 1;
+  google.protobuf.Any data = 2;
+}
+
+message VoteRequestReceived {
+  uint32 requestingNodeId = 1;
+  uint32 receivingNodeId = 2;
+}
+
+message VoteReceived {
+  uint32 votingNodeId = 1;
+  uint32 votedNodeId = 2;
+  bool voteGranted = 3;
+}
+
+message LogEntryReplicated {
+  uint32 leaderId = 1;
+  uint32 receivingNodeId = 2;
+  int64 logEntryNumber = 3;
+}
+
+message LogEntryCommitted {
+  uint32 leaderId = 1;
+  uint32 receivingNodeId = 2;
+  int64 logEntryNumber = 3;
+}
+
+message LeaderSuspected {
+  uint32 leaderId = 1;
+  uint32 suspectingNodeId = 2;
+}
+
+message FollowerSuspected {
+  uint32 leaderId = 1;
+  uint32 followerId = 2;
+}

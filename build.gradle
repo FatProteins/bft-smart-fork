@@ -8,8 +8,8 @@ group 'BFT-SMaRt'
 version '2.0'
 
 compileJava {
-    sourceCompatibility = 8
-    targetCompatibility = 8
+    sourceCompatibility = 19
+    targetCompatibility = 19
 }
 
 repositories {
@@ -159,4 +159,14 @@ dependencies {
 
     // https://mvnrepository.com/artifact/org.slf4j/slf4j-api
     implementation 'org.slf4j:slf4j-api:1.7.32'
+
+    // https://mvnrepository.com/artifact/com.google.protobuf/protobuf-java
+    implementation 'com.google.protobuf:protobuf-java:3.25.0'
+
+    // https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.15.3'
+
+    // https://mvnrepository.com/artifact/com.google.protobuf/protobuf-java-util
+    implementation 'com.google.protobuf:protobuf-java-util:3.25.0'
+
 }

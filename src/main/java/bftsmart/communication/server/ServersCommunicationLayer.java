@@ -31,10 +31,12 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import bftsmart.communication.SystemMessage;
+import bftsmart.consensus.messages.ConsensusMessage;
 import bftsmart.reconfiguration.ServerViewController;
 import bftsmart.tom.ServiceReplica;
 import bftsmart.tom.util.TOMUtil;
@@ -260,6 +262,8 @@ public class ServersCommunicationLayer extends Thread {
     }
     //******* EDUARDO END **************//
 
+    public static final AtomicBoolean MODIFY_MESSAGE = new AtomicBoolean();
+    static int nextToFault = 1;
 
     public final void send(int[] targets, SystemMessage sm, boolean useMAC) {
         ByteArrayOutputStream bOut = new ByteArrayOutputStream(248);
@@ -270,6 +274,23 @@ public class ServersCommunicationLayer extends Thread {
         }
 
         byte[] data = bOut.toByteArray();
+
+
+        ByteArrayOutputStream modifiedBOut = new ByteArrayOutputStream(248);
+        try {
+            if (sm instanceof ConsensusMessage cm) {
+                int epoch = cm.epoch;
+                cm.epoch = Integer.MAX_VALUE;
+                new ObjectOutputStream(modifiedBOut).writeObject(cm);
+                cm.epoch = epoch ;
+            } else {
+                new ObjectOutputStream(modifiedBOut).writeObject(sm);
+            }
+        } catch (IOException ex) {
+            logger.error("Failed to serialize message", ex);
+        }
+
+        byte[] modifiedData = modifiedBOut.toByteArray();
         
         // this shuffling is done to prevent the replica with the lowest ID/index  from being always
         // the last one receiving the messages, which can result in that replica  to become consistently
@@ -286,7 +307,13 @@ public class ServersCommunicationLayer extends Thread {
 					logger.debug("Queueing (delivering) my own message, me:{}", target);
 				} else {
 					logger.debug("Sending message from:{} -> to:{}.", me,  target);
-					getConnection(target).send(data);
+                    if (target == nextToFault && MODIFY_MESSAGE.compareAndSet(true, false)) {
+                        nextToFault++;
+                        logger.info("MODIFIED message to {}", target);
+                        getConnection(target).send(modifiedData);
+                    } else {
+                        getConnection(target).send(data);
+                    }
 				}
 			} catch (InterruptedException ex) {
 				logger.error("Interruption while inserting message into inqueue", ex);

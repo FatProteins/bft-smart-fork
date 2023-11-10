@@ -28,8 +28,8 @@ import bftsmart.communication.SystemMessage;
  */
 public class ConsensusMessage extends SystemMessage {
 
-    private int number; //consensus ID for this message
-    private int epoch; // Epoch to which this message belongs to
+    public int number; //consensus ID for this message
+    public int epoch; // Epoch to which this message belongs to
     private int paxosType; // Message type
     private byte[] value = null; // Value used when message type is PROPOSE
     private Object proof; // Proof used when message type is COLLECT

@@ -93,8 +93,9 @@ public class Epoch implements Serializable {
         writeSent = false;
         acceptSent = false;
         acceptCreated = false;
-            
-        if (timestamp == 0) {
+
+        // TODO: <=
+        if (timestamp <= 0) {
             this.write = new byte[n][];
             this.accept = new byte[n][];
 

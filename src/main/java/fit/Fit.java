@@ -1,14 +1,25 @@
 package fit;
 
+import io.netty.util.internal.StringUtil;
+
 import java.io.IOException;
+import java.util.Objects;
 
 public class Fit {
-    private static final FitNetwork fitNetwork;
+    private static final FitNetwork FIT_NETWORK;
+    private static final String MARKER_KEY;
 
     static {
         try {
             var socketPath = System.getenv("TO_DA_CONTAINER_SOCKET_PATH");
-            fitNetwork = new FitNetwork(socketPath);
+            if (StringUtil.isNullOrEmpty(socketPath)) {
+                throw new RuntimeException("TO_DA_CONTAINER_SOCKET_PATH env variable is empty");
+            }
+            FIT_NETWORK = new FitNetwork(socketPath);
+            MARKER_KEY = System.getenv("CRASH_KEY");
+            if (StringUtil.isNullOrEmpty(MARKER_KEY)) {
+                throw new RuntimeException("TO_DA_CONTAINER_SOCKET_PATH env variable is empty");
+            }
         } catch (IOException exception) {
             throw new RuntimeException(exception);
         }
@@ -19,9 +30,17 @@ public class Fit {
                 .setActionType(actionType)
                 .build();
         try {
-            fitNetwork.sendMessage(message);
+            FIT_NETWORK.sendMessage(message);
         } catch (IOException exception) {
             throw new RuntimeException(exception);
         }
+    }
+
+    public static void injectOnMarker(Messages.ActionType actionType, Object marker) {
+        if (!Objects.equals(marker, MARKER_KEY)) {
+            return;
+        }
+
+        injectAction(actionType);
     }
 }

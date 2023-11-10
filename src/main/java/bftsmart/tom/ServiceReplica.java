@@ -148,7 +148,7 @@ public class ServiceReplica {
             cs = new ServerCommunicationSystem(this.SVController, this);
         } catch (Exception ex) {
             logger.error("Failed to initialize replica-to-replica communication system", ex);
-            throw new RuntimeException("Unable to build a communication system.");
+            throw new RuntimeException("Unable to build a communication system.", ex);
         }
 
         if (this.SVController.isInCurrentView()) {

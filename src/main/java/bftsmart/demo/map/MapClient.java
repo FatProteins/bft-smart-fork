@@ -29,7 +29,7 @@ public class MapClient<K, V> implements Map<K, V>{
 			return null;
 		}
 		if (rep.length == 0) {
-			return null;
+			return (V) "";
 		}
 
 		try {

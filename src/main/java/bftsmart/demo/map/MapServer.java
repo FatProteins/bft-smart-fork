@@ -17,15 +17,15 @@ import bftsmart.consensus.messages.ConsensusMessage;
 import bftsmart.tom.MessageContext;
 import bftsmart.tom.ServiceReplica;
 import bftsmart.tom.server.defaultservices.DefaultSingleRecoverable;
+import fit.Fit;
+import fit.Messages;
 
 public class MapServer<K, V> extends DefaultSingleRecoverable {
 
 	private Map<K, V> replicaMap;
 	private Logger logger;
-	private final int replicaId;
 
 	public MapServer(int id) {
-		replicaId = id;
 		replicaMap = new TreeMap<>();
 		logger = Logger.getLogger(MapServer.class.getName());
 		new ServiceReplica(id, this, this);
@@ -50,9 +50,8 @@ public class MapServer<K, V> extends DefaultSingleRecoverable {
 			switch (cmd) {
 				//write operations on the map
 				case PUT:
-					if (request.getKey().equals(Integer.toString(replicaId))) {
-						ServersCommunicationLayer.MODIFY_MESSAGE.set(true);
-					}
+					Fit.injectOnMarker(Messages.ActionType.STOP_ACTION_TYPE, request.getKey());
+
 					V oldValue = replicaMap.put(request.getKey(), request.getValue());
 
 					if (oldValue != null) {
@@ -124,7 +123,7 @@ public class MapServer<K, V> extends DefaultSingleRecoverable {
 	@Override
 	public byte[] getSnapshot() {
 		try (ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
-				ObjectOutput objOut = new ObjectOutputStream(byteOut)) {
+			 ObjectOutput objOut = new ObjectOutputStream(byteOut)) {
 			objOut.writeObject(replicaMap);
 			return byteOut.toByteArray();
 		} catch (IOException e) {
@@ -137,7 +136,7 @@ public class MapServer<K, V> extends DefaultSingleRecoverable {
 	@Override
 	public void installSnapshot(byte[] state) {
 		try (ByteArrayInputStream byteIn = new ByteArrayInputStream(state);
-				ObjectInput objIn = new ObjectInputStream(byteIn)) {
+			 ObjectInput objIn = new ObjectInputStream(byteIn)) {
 			replicaMap = (Map<K, V>)objIn.readObject();
 		} catch (IOException | ClassNotFoundException e) {
 			logger.log(Level.SEVERE, "Error while installing snapshot", e);

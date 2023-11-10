@@ -8,8 +8,8 @@ group 'BFT-SMaRt'
 version '2.0'
 
 compileJava {
-    sourceCompatibility = 19
-    targetCompatibility = 19
+    sourceCompatibility = 21
+    targetCompatibility = 21
 }
 
 repositories {

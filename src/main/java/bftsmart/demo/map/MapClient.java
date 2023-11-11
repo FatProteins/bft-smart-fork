@@ -34,7 +34,7 @@ public class MapClient<K, V> implements Map<K, V>{
 
 		try {
 			MapMessage<K,V> response = MapMessage.fromBytes(rep);
-			return response.getValue();
+			return (V) "";
 		} catch (ClassNotFoundException | IOException ex) {
 			System.out.println("Failed to deserialized response of PUT request: " + ex.getMessage());
 			return null;

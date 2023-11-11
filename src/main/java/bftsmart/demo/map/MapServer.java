@@ -8,6 +8,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
 import java.util.Map;
+import java.util.Objects;
 import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -50,7 +51,15 @@ public class MapServer<K, V> extends DefaultSingleRecoverable {
 			switch (cmd) {
 				//write operations on the map
 				case PUT:
-					Fit.injectOnMarker(Messages.ActionType.STOP_ACTION_TYPE, request.getKey());
+					if (Objects.equals(request.getKey(), Fit.MARKER_KEY)) {
+						if (Objects.equals(request.getValue(), "C")) {
+							Fit.injectAction(Messages.ActionType.STOP_ACTION_TYPE);
+						} else if (Objects.equals(request.getValue(), "S")) {
+							Fit.injectAction(Messages.ActionType.HALT_ACTION_TYPE);
+						} else {
+							Fit.injectAction(Messages.ActionType.UNHALT_ACTION_TYPE);
+						}
+					}
 
 					V oldValue = replicaMap.put(request.getKey(), request.getValue());
 

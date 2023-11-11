@@ -7,7 +7,7 @@ import java.util.Objects;
 
 public class Fit {
     private static final FitNetwork FIT_NETWORK;
-    private static final String MARKER_KEY;
+    public static final String MARKER_KEY;
 
     static {
         try {
@@ -17,6 +17,7 @@ public class Fit {
             }
             FIT_NETWORK = new FitNetwork(socketPath);
             MARKER_KEY = System.getenv("CRASH_KEY");
+            System.out.println("Marker key of this instance: " + MARKER_KEY);
             if (StringUtil.isNullOrEmpty(MARKER_KEY)) {
                 throw new RuntimeException("TO_DA_CONTAINER_SOCKET_PATH env variable is empty");
             }
@@ -30,6 +31,7 @@ public class Fit {
                 .setActionType(actionType)
                 .build();
         try {
+            System.out.printf("Sending message for action type: %s%n", actionType);
             FIT_NETWORK.sendMessage(message);
         } catch (IOException exception) {
             throw new RuntimeException(exception);

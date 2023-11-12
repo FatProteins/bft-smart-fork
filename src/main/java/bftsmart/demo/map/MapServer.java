@@ -7,6 +7,7 @@ import java.io.ObjectInput;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.TreeMap;
@@ -27,7 +28,8 @@ public class MapServer<K, V> extends DefaultSingleRecoverable {
 	private Logger logger;
 
 	public MapServer(int id) {
-		replicaMap = new TreeMap<>();
+//		replicaMap = new TreeMap<>();
+		replicaMap = new HashMap<>(10000000);
 		logger = Logger.getLogger(MapServer.class.getName());
 		new ServiceReplica(id, this, this);
 	}
@@ -64,7 +66,7 @@ public class MapServer<K, V> extends DefaultSingleRecoverable {
 					V oldValue = replicaMap.put(request.getKey(), request.getValue());
 
 					if (oldValue != null) {
-						response.setValue(oldValue);
+						response.setValue("");
 					}
 					return MapMessage.toBytes(response);
 				case REMOVE:
